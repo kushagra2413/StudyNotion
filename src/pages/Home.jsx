@@ -10,6 +10,7 @@ import LearningLanguageSection from '../components/core/HomePage/LearningLanguag
 import InstructionSection from '../components/core/HomePage/InstructorSection';
 import ExploreMore from '../components/core/HomePage/ExploreMore';
 import Footer from '../components/common/Footer';
+import ReviewSlider from '../components/common/ReviewSlider';
 
 const Home = () => {
   return (
@@ -37,7 +38,7 @@ const Home = () => {
             </div>
 
             <div className='flex flex-row gap-7 mt-8'>
-                <CTAButton active={true} linkto={"/signup"}>
+                <CTAButton active={true} linkto={"/learn-more"}>
                     Learn More
                 </CTAButton>
 
@@ -69,7 +70,7 @@ const Home = () => {
   }}
   ctabtn2={{
     btnText: "learn more",
-    linkto: "/login",
+    linkto: "/learn-more",
     active: false,
   }}
   codeblock={`<!DOCTYPE html>\n<html>\n<head>\n  <title>Example</title>\n  <link rel="stylesheet" href="styles.css">\n</head>\n<body>\n  <h1><a href="/">Header</a></h1>\n  <nav>\n    <a href="one/">One</a>\n    <a href="two/">Two</a>\n    <a href="three/">Three</a>\n  </nav>\n</body>\n</html>`}
@@ -95,7 +96,7 @@ const Home = () => {
   }}
   ctabtn2={{
     btnText: "learn more",
-    linkto: "/login",
+    linkto: "/learn-more",
     active: false,
   }}
   codeblock={`<!DOCTYPE html>\n<html>\n<head>\n  <title>Example</title>\n  <link rel="stylesheet" href="styles.css">\n</head>\n<body>\n  <h1><a href="/">Header</a></h1>\n  <nav>\n    <a href="one/">One</a>\n    <a href="two/">Two</a>\n    <a href="three/">Three</a>\n  </nav>\n</body>\n</html>`}
@@ -123,7 +124,7 @@ const Home = () => {
               </div>
              </CTAButton>
 
-             <CTAButton active={false} linkto={"/signup"}>
+             <CTAButton active={false} linkto={"/learn-more"}>
               <div>
                 Learn More
               </div>
@@ -155,7 +156,7 @@ const Home = () => {
            specialist requires more than professional skills. 
 
            </div>
-           <CTAButton active={true} linkto={"/signup"}>
+           <CTAButton active={true} linkto={"/learn-more"}>
             <div>
               Learn More
             </div>
@@ -182,7 +183,8 @@ const Home = () => {
            <InstructionSection/>
 
            <h2 className='text-center text-4xl font-semibold mt-10'>Review from Other Learners</h2>
-
+            {/* ReviewSlider */}
+            <ReviewSlider/>
 
           </div>
 

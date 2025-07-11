@@ -17,6 +17,8 @@ import PrivateRoute from "./components/core/Auth/PrivateRoute";
 import Error from "./pages/Error"
 import Settings from "./components/core/Dashboard/Settings";
 import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getUserDetails } from "./services/operations/profileAPI";
 import EnrolledCourses from "./components/core/Dashboard/EnrolledCourses";
 import Cart from "./components/core/Dashboard/Cart";
 import { ACCOUNT_TYPE } from "./utils/constants";
@@ -25,6 +27,11 @@ import MyCourses from "./components/core/Dashboard/MyCourses";
 import EditCourse from "./components/core/Dashboard/EditCourse/index";
 import Catalog from "./pages/Catalog";
 import CourseDetails from "./pages/CourseDetails";
+import ViewCourse from "./pages/ViewCourse";
+import VideoDetails from "./components/core/ViewCourse/VideoDetails";
+import Instructor from "./components/core/Dashboard/InstructorDashboard/Instructor";
+import PurchaseHistory from "./components/core/Dashboard/PurchaseHistory";
+import LearnMore from "./pages/LearnMore";
 
 function App() {
 
@@ -32,6 +39,14 @@ function App() {
   const navigate = useNavigate();
   
   const { user } = useSelector((state) => state.profile)
+  const { token } = useSelector((state) => state.auth)
+
+  useEffect(() => {
+    // If we have a token but no user, fetch user details
+    if (token && !user) {
+      dispatch(getUserDetails(token, navigate))
+    }
+  }, [token, user, dispatch, navigate])
 
 
   return (
@@ -89,14 +104,15 @@ function App() {
         />  
 
     <Route
-          path="about"
+          path="/about"
           element={
-            <OpenRoute>
+            
               <About />
-            </OpenRoute>
+           
           }
         />
     <Route path="/contact" element={<Contact />} />
+    <Route path="/learn-more" element={<LearnMore />} />
 
     <Route 
       element={
@@ -106,6 +122,7 @@ function App() {
       }
     >
       <Route path="dashboard/my-profile" element={<MyProfile />} />
+
       <Route path="dashboard/Settings" element={<Settings />} />
       
 
@@ -114,6 +131,7 @@ function App() {
           <>
           <Route path="dashboard/cart" element={<Cart />} />
           <Route path="dashboard/enrolled-courses" element={<EnrolledCourses />} />
+          <Route path="dashboard/purchase-history" element={<PurchaseHistory />} />
           </>
         )
       }
@@ -121,6 +139,7 @@ function App() {
       {
         user?.accountType === ACCOUNT_TYPE.INSTRUCTOR && (
           <>
+          <Route path="dashboard/instructor" element={<Instructor />} />
           <Route path="dashboard/add-course" element={<AddCourse />} />
           <Route path="dashboard/my-courses" element={<MyCourses />} />
           <Route path="dashboard/edit-course/:courseId" element={<EditCourse />} />
@@ -131,7 +150,25 @@ function App() {
 
     </Route>
 
-    
+
+      <Route element={
+        <PrivateRoute>
+          <ViewCourse/>
+        </PrivateRoute>
+      }>
+      {
+        user?.accountType === ACCOUNT_TYPE.STUDENT && ( 
+          <>
+            <Route 
+              path="view-course/:courseId/section/:sectionId/sub-section/:subSectionId"
+              element={<VideoDetails/>}
+              />
+          </>
+        ) 
+      }
+
+      </Route>
+
 
     <Route path="*" element={<Error />} />
 

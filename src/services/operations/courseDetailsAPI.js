@@ -260,10 +260,29 @@ export const deleteSubSection = async (data, token) => {
 }
 
 // fetching all courses under a specific instructor
-export const fetchInstructorCourses = async (token) => {
+export const fetchInstructorCourses = async (token, userAccountType = null) => {
+  console.log("=== FETCH INSTRUCTOR COURSES DEBUG ===")
+  console.log("Token:", token ? "Token exists" : "No token")
+  console.log("User Account Type:", userAccountType)
+  
   let result = []
+  
+  // Early return if user is not an instructor
+  if (userAccountType && userAccountType !== "Instructor") {
+    console.log("Access denied: User is not an instructor")
+    return result
+  }
+  
   const toastId = toast.loading("Loading...")
   try {
+    if (!token) {
+      throw new Error("Authentication token is required")
+    }
+    
+    console.log("Making API call to:", GET_ALL_INSTRUCTOR_COURSES_API)
+    console.log("Headers being sent:", {
+      Authorization: `Bearer ${token}`,
+    })
     const response = await apiConnector(
       "GET",
       GET_ALL_INSTRUCTOR_COURSES_API,
@@ -277,9 +296,19 @@ export const fetchInstructorCourses = async (token) => {
       throw new Error("Could Not Fetch Instructor Courses")
     }
     result = response?.data?.data
+    console.log("Successfully fetched courses:", result)
   } catch (error) {
     console.log("INSTRUCTOR COURSES API ERROR............", error)
-    toast.error(error.message)
+    console.log("Error status:", error.response?.status)
+    console.log("Error data:", error.response?.data)
+    
+    if (error.response?.status === 401) {
+      console.error("Unauthorized: Please login as an instructor")
+    } else if (error.response?.status === 403) {
+      console.error("Access denied: Instructor privileges required")
+    } else {
+      console.error(error.message || "Could not fetch instructor courses")
+    }
   }
   toast.dismiss(toastId)
   return result
@@ -287,21 +316,33 @@ export const fetchInstructorCourses = async (token) => {
 
 // delete a course
 export const deleteCourse = async (data, token) => {
-  const toastId = toast.loading("Loading...")
+  const toastId = toast.loading("Deleting course...")
   try {
+    console.log("=== DELETE COURSE DEBUG ===")
+    console.log("Data:", data)
+    console.log("Token:", token ? "Token exists" : "No token")
+    
     const response = await apiConnector("DELETE", DELETE_COURSE_API, data, {
       Authorization: `Bearer ${token}`,
     })
     console.log("DELETE COURSE API RESPONSE............", response)
+    
     if (!response?.data?.success) {
-      throw new Error("Could Not Delete Course")
+      throw new Error(response?.data?.message || "Could Not Delete Course")
     }
-    toast.success("Course Deleted")
+    
+    toast.dismiss(toastId)
+    toast.success("Course Deleted Successfully")
+    return { success: true }
   } catch (error) {
     console.log("DELETE COURSE API ERROR............", error)
-    toast.error(error.message)
+    console.log("Error response:", error.response?.data)
+    
+    toast.dismiss(toastId)
+    const errorMessage = error.response?.data?.message || error.message || "Failed to delete course"
+    toast.error(errorMessage)
+    return { success: false, error: errorMessage }
   }
-  toast.dismiss(toastId)
 }
 
 // get full details of a course
@@ -339,25 +380,44 @@ export const getFullDetailsOfCourse = async (courseId, token) => {
 // mark a lecture as complete
 export const markLectureAsComplete = async (data, token) => {
   let result = null
-  console.log("mark complete data", data)
+  console.log("=== MARK LECTURE COMPLETE DEBUG ===")
+  console.log("Data being sent:", data)
+  console.log("CourseId:", data?.courseId)
+  console.log("SubSectionId:", data?.subSectionId)
+  console.log("Token exists:", !!token)
+  console.log("API URL:", LECTURE_COMPLETION_API)
+  
   const toastId = toast.loading("Loading...")
   try {
     const response = await apiConnector("POST", LECTURE_COMPLETION_API, data, {
       Authorization: `Bearer ${token}`,
     })
     console.log(
-      "MARK_LECTURE_AS_COMPLETE_API API RESPONSE............",
+      "LECTURE_COMPLETION_API API RESPONSE............",
       response
     )
 
-    if (!response.data.message) {
-      throw new Error(response.data.error)
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Failed to mark lecture as complete")
     }
     toast.success("Lecture Completed")
     result = true
   } catch (error) {
-    console.log("MARK_LECTURE_AS_COMPLETE_API API ERROR............", error)
-    toast.error(error.message)
+    console.log("LECTURE_COMPLETION_API API ERROR............", error)
+    console.log("Error details:", error.response?.data)
+    console.log("Error status:", error.response?.status)
+    
+    // More specific error handling
+    if (error.response?.status === 400) {
+      const errorMessage = error.response?.data?.message || "Bad request - check your data"
+      toast.error(errorMessage)
+    } else if (error.response?.status === 401) {
+      toast.error("Authentication failed - please login again")
+    } else if (error.response?.status === 404) {
+      toast.error("Course or lecture not found")
+    } else {
+      toast.error(error.response?.data?.message || error.message || "Failed to complete lecture")
+    }
     result = false
   }
   toast.dismiss(toastId)

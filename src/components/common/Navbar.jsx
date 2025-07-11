@@ -9,6 +9,7 @@ import { NavbarLinks } from "../../data/navbar-links"
 import { apiConnector } from "../../services/apiconnector"
 import { categories } from "../../services/apis"
 import { ACCOUNT_TYPE } from "../../utils/constants"
+import { categoryNameToUrlPath } from "../../utils/categoryHelpers"
 import ProfileDropdown from "../core/Auth/ProfileDropDown"
 
 function Navbar() {
@@ -16,6 +17,11 @@ function Navbar() {
   const { user } = useSelector((state) => state.profile)
   const { totalItems } = useSelector((state) => state.cart)
   const location = useLocation()
+
+  // Debug logs
+  console.log("Navbar - token:", token)
+  console.log("Navbar - user:", user)
+  console.log("Navbar - should show profile:", token !== null)
 
   const [subLinks, setSubLinks] = useState([])
   const [loading, setLoading] = useState(false)
@@ -72,11 +78,7 @@ function Navbar() {
                           <>
                             {subLinks.map((subLink, i) => (
                               <Link
-                                to={`/catalog/${subLink.name
-                                  .replace(/\//g, "-") // <-- Replace slashes with dashes
-                                  .split(" ")
-                                  .join("-")
-                                  .toLowerCase()}`}
+                                to={`/catalog/${categoryNameToUrlPath(subLink.name)}`}
                                 className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50"
                                 key={i}
                               >
